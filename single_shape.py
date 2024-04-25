@@ -2,7 +2,7 @@
 import cv2 as cv
 import numpy as np
 #--Đọc ảnh và chuyển ảnh sang gray
-arr = cv.imread('./trapez.jpg')
+arr = cv.imread('./photos/Pentagon.png')
 gray_arr = cv.cvtColor(arr,cv.COLOR_BGR2GRAY)
 #--Sử dụng nhiễu Gaussian để làm mịn
 gauss = cv.GaussianBlur(gray_arr,(5,5),0)
@@ -13,15 +13,14 @@ canny = cv.Canny(gauss,120,200)
 #--Tìm các đường viền với cài đặt chỉ tìm các đường viền ngoài
 contours,_ = cv.findContours(canny,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_NONE)
 
-# print(contours[0].shape)
+# print(contours[0])
 #--Tính toán xấp xỉ chu vi đường
 perimeter = cv.arcLength(contours[0],True)
 # print(perimeter)
 #--Tìm đường viền xấp xỉ khép kín với đường viền của vật thể gốc
-approximate_shape = cv.approxPolyDP(contours[0],0.1*perimeter,True)
+approximate_shape = cv.approxPolyDP(contours[0],0.01*perimeter,True)
 #--Tìm số các điểm tạo đường viền xấp xỉ
 len_approx = len(approximate_shape)
-# print(len_approx)
 
 #--Nếu có 4 điểm tạo nên đường viền xấp xỉ khép kín-> kết quả cho ra có thể là hình bình hành, hình chữ nhật, hình vuông
 if len_approx==4:
@@ -64,9 +63,26 @@ if len_approx==4:
             print("Trapeziem") #Hình thang
         
 #--Nếu có 3 điểm tạo nên đường viên xấp xỉ khép kín -> kết quả cho ra là hình tam giác (chưa làm)
+if len_approx == 3:
+    point_A = approximate_shape[0][0]
+    point_B = approximate_shape[1][0]
+    point_C = approximate_shape[2][0]
+    AB_distance = np.sqrt(np.power(point_A[0]-point_B[0],2)+np.power(point_A[1]-point_B[1],2))
+    AC_distance = np.sqrt(np.power(point_A[0]-point_C[0],2)+np.power(point_A[1]-point_C[1],2))
+    BC_distance = np.sqrt(np.power(point_B[0]-point_C[0],2)+np.power(point_B[1]-point_C[1],2))
+    #-Vẽ line kiểm chứng
+    cv.line(arr,point_A,point_B,(0,255,0),2)
+    cv.line(arr,point_A,point_C,(0,255,0),2)
+    cv.line(arr,point_B,point_C,(0,255,0),2)
+    print("Triangle")
 #--Còn lại khum bít
 else:
+    for x in range(len_approx-1):
+        cv.line(arr,approximate_shape[x][0],approximate_shape[x+1][0],(0,255,0),2)
+        if x == len_approx-2:
+            cv.line(arr,approximate_shape[0][0],approximate_shape[x+1][0],(0,255,0),2)
     print("I dunno")
+    print(f'Number of Points :{len_approx}')
 
 cv.imshow('bla',arr)
 
