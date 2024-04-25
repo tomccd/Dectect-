@@ -1,0 +1,1 @@
+# Nhận diện hình dạng vật thể đơn lẻ - Detecting a single shape
