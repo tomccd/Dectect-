@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 #--Đọc ảnh và chuyển ảnh sang gray
-arr = cv.imread('./photos/diamond.jpg')
+arr = cv.imread('./photos/list_shape.png')
 gray_arr = cv.cvtColor(arr,cv.COLOR_BGR2GRAY)
 
 #--Sử dụng nhiễu Gaussian để làm mịn
@@ -13,7 +13,6 @@ canny = cv.Canny(gauss,120,200)
 
 #--Tìm các đường viền với cài đặt chỉ tìm các đường viền ngoài trong canny
 contours,_ = cv.findContours(canny,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_NONE)
-
 #--Biến đếm
 count_square = 0
 count_rectangle = 0
@@ -39,14 +38,17 @@ for x in range(len(contours)):
         CD_distance = np.sqrt(np.power(point_C[0]-point_D[0],2)+np.power(point_C[1]-point_D[1],2))
         BC_distance = np.sqrt(np.power(point_B[0]-point_C[0],2)+np.power(point_B[1]-point_C[1],2))
         AC_distance = np.sqrt(np.power(point_A[0]-point_C[0],2)+np.power(point_A[1]-point_C[1],2))
+        BD_distance = np.sqrt(np.power(point_B[0]-point_D[0],2)+np.power(point_B[1]-point_D[1],2))
         #-Sử dụng Pytago tìm đường chéo để phân biệt giữa hình bình hành và 2 hình vuông và hình chữ nhật
         diagonal = np.sqrt(np.power(AB_distance,2)+np.power(AD_distance,2))
         # print(f'AB : {AB_distance}px, AD : {AD_distance}px, AC : {AC_distance}px, Diagonal : {diagonal}')
         #- Xây dựng điều kiện đường chéo
-        condition_diagonal_1 = np.abs(AC_distance-diagonal) >= 0
+        condition_diagonal_1 = np.abs(BD_distance-diagonal) <= 3
         condition_diagonal_2 = np.abs(AC_distance-diagonal) <= 3
+        sum_condition = np.logical_and(condition_diagonal_1,condition_diagonal_2)
+        condition_diagonal_3 = np.abs(AC_distance-BD_distance) <= 3
         #- Nếu mà điều kiện Pytagos đúng -> phân biệt được hình bình hành,hình thang với hình vuông và hình chữ nhật
-        if np.logical_and(condition_diagonal_1,condition_diagonal_2) == True:
+        if np.logical_and(sum_condition,condition_diagonal_3) == True:
             #- Xây dựng điều kiện AB xấp xỉ bằng AD -> là hình vuông, nếu không là hình chữ nhật
             if (np.abs(AB_distance-AD_distance) <=3) == True:
                 # print("Square") #Hình vuông

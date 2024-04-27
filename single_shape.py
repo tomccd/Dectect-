@@ -2,7 +2,7 @@
 import cv2 as cv
 import numpy as np
 #--Đọc ảnh và chuyển ảnh sang gray
-arr = cv.imread('./photos/Pentagon.png')
+arr = cv.imread('./photos/circle.jpg')
 gray_arr = cv.cvtColor(arr,cv.COLOR_BGR2GRAY)
 #--Sử dụng nhiễu Gaussian để làm mịn
 gauss = cv.GaussianBlur(gray_arr,(5,5),0)
